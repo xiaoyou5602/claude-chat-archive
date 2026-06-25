@@ -140,15 +140,20 @@ body {
 
 /* ====== STATS ROW ====== */
 .stats-row {
-  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;
+  margin-bottom: 24px;
+}
+.stats-inner {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 10px;
 }
 .stat-card {
-  flex: 1; min-width: 100px;
   background: var(--card); backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-radius: var(--radius); padding: 14px 16px;
+  border-radius: var(--radius); padding: 14px 8px;
   text-align: center; box-shadow: var(--shadow);
   border: 1px solid var(--border);
+}
+.stat-card.wide {
+  grid-column: 1 / -1;
 }
 .stat-card .stat-num {
   font-size: 22px; font-weight: 700; color: var(--accent);
@@ -243,6 +248,7 @@ body {
   .header h1 { font-size: 22px; }
   .dropzone { padding: 32px 16px; }
   .cards { grid-template-columns: 1fr; }
+  .stats-inner { grid-template-columns: repeat(3, 1fr); }
   .name-row { flex-direction: column; }
 }
 
@@ -355,15 +361,14 @@ function processContent(arr) {
 }
 
 function detectUserName(conversations) {
+  const skip = [/^[你嗨哈早晚]/, /[?？]/, /^连接/, /^打开/, /^帮/, /^请/, /^怎么/, /^如何/, /^http/, /\.json/, /^customize/i, /^搭/];
   for (const conv of conversations) {
     for (const m of conv.chat_messages || []) {
       if (m.sender === 'human') {
         for (const c of m.content || []) {
           if (c.type === 'text' && c.text && c.text.trim()) {
             const t = c.text.trim();
-            if (t.length <= 20 && !/^[你嗨哈早晚]/.test(t) && !/[?？]/.test(t)) {
-              return t;
-            }
+            if (t.length <= 20 && !skip.some(p => p.test(t))) return t;
           }
         }
       }
@@ -466,12 +471,12 @@ function renderStats(archive) {
   ];
 
   statsRow.innerHTML =
-    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">' +
+    '<div class="stats-inner">' +
     items.map(i =>
       `<div class="stat-card"><div class="stat-num">${i.num}</div><div class="stat-label">${i.label}</div></div>`
     ).join('') +
     '</div>' +
-    '<div class="stat-card" style="text-align:center"><div class="stat-num" style="font-size:16px">' +
+    '<div class="stat-card wide"><div class="stat-num" style="font-size:16px">' +
     (earliest||'?') + '  →  ' + (latest||'?') +
     '</div><div class="stat-label">时间跨度</div></div>';
   statsEl.style.display = 'block';
