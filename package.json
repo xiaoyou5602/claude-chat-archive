@@ -1,0 +1,30 @@
+{
+  "name": "claude-chat-archive",
+  "version": "1.0.0",
+  "description": "把 Claude 导出的 conversations.json 转成人类可读的 Markdown 存档",
+  "main": "claude-chat-archive.js",
+  "bin": {
+    "claude-chat-archive": "./claude-chat-archive.js"
+  },
+  "scripts": {
+    "start": "node claude-chat-archive.js"
+  },
+  "keywords": [
+    "claude",
+    "chat",
+    "archive",
+    "markdown",
+    "export",
+    "anthropic",
+    "conversation"
+  ],
+  "author": "toge",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xiaoyou5602/claude-chat-archive"
+  }
+}
