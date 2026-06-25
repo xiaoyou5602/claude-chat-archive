@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Chat Archive</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root {
+  --bg: #fdf6f0;
+  --card: rgba(255,255,255,0.75);
+  --text: #3d2e28;
+  --muted: #9b8579;
+  --accent: #e8815b;
+  --accent2: #f4b08c;
+  --accent3: #fce4d6;
+  --border: #e8d5c8;
+  --shadow: 0 2px 16px rgba(120,70,40,0.06);
+  --radius: 16px;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, #fef0e8 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 70%, #fce8dd 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, #fdf2ea 0%, transparent 40%);
+}
+
+/* ====== DECOR ====== */
+.decor-top {
+  position: fixed; top: -80px; right: -60px; width: 280px; height: 280px;
+  border-radius: 50%; background: var(--accent3); opacity: 0.5; pointer-events: none;
+  filter: blur(40px); z-index: 0;
+}
+.decor-bottom {
+  position: fixed; bottom: -100px; left: -80px; width: 320px; height: 320px;
+  border-radius: 50%; background: #fde4d4; opacity: 0.45; pointer-events: none;
+  filter: blur(50px); z-index: 0;
+}
+
+/* ====== LAYOUT ====== */
+.container {
+  max-width: 800px; margin: 0 auto; padding: 40px 20px 80px;
+  position: relative; z-index: 1;
+}
+
+/* ====== HEADER ====== */
+.header {
+  text-align: center; margin-bottom: 32px;
+}
+.header .icon {
+  font-size: 48px; margin-bottom: 8px;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.header h1 {
+  font-size: 26px; font-weight: 600; color: var(--text);
+  letter-spacing: -0.5px;
+}
+.header p {
+  color: var(--muted); font-size: 14px; margin-top: 4px;
+}
+
+/* ====== DROP ZONE ====== */
+.dropzone {
+  border: 2.5px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 48px 24px; text-align: center;
+  cursor: pointer; transition: all 0.25s;
+  background: var(--card); backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  margin-bottom: 24px;
+  position: relative; overflow: hidden;
+}
+.dropzone:hover, .dropzone.drag-over {
+  border-color: var(--accent);
+  background: rgba(255,245,238,0.9);
+  box-shadow: 0 0 0 4px rgba(232,129,91,0.08);
+  transform: translateY(-2px);
+}
+.dropzone .dz-icon {
+  font-size: 42px; margin-bottom: 10px; display: block;
+}
+.dropzone .dz-title {
+  font-size: 16px; font-weight: 600; color: var(--text);
+}
+.dropzone .dz-sub {
+  font-size: 13px; color: var(--muted); margin-top: 4px;
+}
+.dropzone input { display: none; }
+
+/* ====== STATUS BAR ====== */
+.status {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; padding: 12px 20px; border-radius: 50px;
+  background: var(--card); backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  margin-bottom: 24px; font-size: 13px; color: var(--muted);
+  box-shadow: var(--shadow); transition: all 0.3s;
+}
+.status.ready { color: #6b9b6b; }
+.status .dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--border);
+  transition: background 0.3s;
+}
+.status.ready .dot { background: #8cbf8c; }
+
+/* ====== NAME INPUTS ====== */
+.name-row {
+  display: flex; gap: 12px; margin-bottom: 24px; align-items: center;
+  flex-wrap: wrap; justify-content: center;
+}
+.name-row label {
+  font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px;
+}
+.name-row input {
+  border: 1.5px solid var(--border); border-radius: 50px;
+  padding: 8px 14px; font-size: 14px; background: var(--card);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  color: var(--text); width: 120px; text-align: center;
+  transition: all 0.2s; font-family: var(--font);
+}
+.name-row input:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(232,129,91,0.1);
+}
+.name-row .sep {
+  color: var(--muted); font-size: 13px;
+}
+
+/* ====== CARDS GRID ====== */
+.section-title {
+  font-size: 14px; font-weight: 600; color: var(--muted);
+  margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.cards {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
+  gap: 12px; margin-bottom: 24px;
+}
+.card {
+  background: var(--card); backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius); padding: 16px 18px;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+  transition: all 0.25s; cursor: default;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(120,70,40,0.1);
+  border-color: var(--accent2);
+}
+.card .card-name {
+  font-size: 15px; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 6px;
+}
+.card .card-meta {
+  font-size: 12px; color: var(--muted); line-height: 1.6;
+}
+.card .card-meta span {
+  display: inline-block; background: var(--accent3);
+  padding: 2px 8px; border-radius: 50px; margin-right: 4px; margin-top: 2px;
+  font-size: 11px;
+}
+
+/* ====== ACTIONS ====== */
+.actions {
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+}
+.btn {
+  padding: 12px 28px; border-radius: 50px; font-size: 14px; font-weight: 600;
+  border: none; cursor: pointer; transition: all 0.25s;
+  font-family: var(--font); letter-spacing: -0.3px;
+}
+.btn-primary {
+  background: var(--accent); color: #fff;
+  box-shadow: 0 4px 14px rgba(232,129,91,0.3);
+}
+.btn-primary:hover {
+  background: #d97450; transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(232,129,91,0.4);
+}
+.btn-primary:disabled {
+  background: #d4b8aa; box-shadow: none; cursor: not-allowed; transform: none;
+}
+.btn-secondary {
+  background: transparent; border: 1.5px solid var(--border);
+  color: var(--text);
+}
+.btn-secondary:hover {
+  border-color: var(--accent); color: var(--accent);
+}
+.btn-append {
+  background: transparent; border: 1.5px dashed var(--border);
+  color: var(--muted); font-size: 13px;
+}
+.btn-append:hover {
+  border-color: var(--accent2); color: var(--accent);
+}
+
+/* ====== TOAST ====== */
+.toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: var(--text); color: #fff; padding: 12px 24px;
+  border-radius: 50px; font-size: 14px; z-index: 100;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  pointer-events: none; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 500px) {
+  .header h1 { font-size: 22px; }
+  .dropzone { padding: 32px 16px; }
+  .cards { grid-template-columns: 1fr; }
+  .name-row { flex-direction: column; }
+}
+
+/* ====== EMPTY STATE ====== */
+.empty-hint {
+  text-align: center; padding: 24px; color: var(--muted); font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<div class="decor-top"></div>
+<div class="decor-bottom"></div>
+
+<div class="container">
+  <div class="header">
+    <span class="icon">📦</span>
+    <h1>Claude Chat Archive</h1>
+    <p>拖入 conversations.json，一键变成可读的日记存档</p>
+  </div>
+
+  <div class="dropzone" id="dropzone">
+    <span class="dz-icon">📂</span>
+    <div class="dz-title">拖入 conversations.json</div>
+    <div class="dz-sub">或点击这里选择文件 · 数据留在本地，不上传服务器</div>
+    <input type="file" id="fileInput" accept=".json">
+  </div>
+
+  <div class="status" id="status">
+    <span class="dot"></span> 等待导入...
+  </div>
+
+  <div class="name-row">
+    <label>🙋 <input type="text" id="nameHuman" placeholder="自动检测" value=""></label>
+    <span class="sep">·</span>
+    <label>🤖 <input type="text" id="nameAI" placeholder="Claude" value="Claude"></label>
+  </div>
+
+  <div id="summary" style="display:none;">
+    <div class="section-title" id="summaryTitle">会话预览</div>
+    <div class="cards" id="cards"></div>
+  </div>
+
+  <div class="actions" id="actions" style="display:none;">
+    <button class="btn btn-secondary btn-append" id="btnAppend">📎 追加新的 JSON</button>
+    <button class="btn btn-primary" id="btnDownload">⬇ 下载 Markdown 存档</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const statusEl = document.getElementById('status');
+const cardsEl = document.getElementById('cards');
+const summaryEl = document.getElementById('summary');
+const summaryTitle = document.getElementById('summaryTitle');
+const actionsEl = document.getElementById('actions');
+const btnDownload = document.getElementById('btnDownload');
+const btnAppend = document.getElementById('btnAppend');
+const nameHuman = document.getElementById('nameHuman');
+const nameAI = document.getElementById('nameAI');
+const toast = document.getElementById('toast');
+
+let allConversations = []; // merged data
+
+// ====== HELPERS ======
+
+function toLocalTime(iso) {
+  const d = new Date(new Date(iso).getTime() + 8 * 60 * 60 * 1000);
+  return String(d.getUTCHours()).padStart(2,'0') + ':' + String(d.getUTCMinutes()).padStart(2,'0');
+}
+
+function extractDate(iso) {
+  const d = new Date(new Date(iso).getTime() + 8 * 60 * 60 * 1000);
+  return d.getUTCFullYear() + '-' + String(d.getUTCMonth()+1).padStart(2,'0') + '-' + String(d.getUTCDate()).padStart(2,'0');
+}
+
+function getConvName(conv) {
+  if (conv.name && conv.name.trim()) return conv.name.trim();
+  for (const m of conv.chat_messages || []) {
+    if (m.sender === 'human') {
+      for (const c of m.content || []) {
+        if (c.type === 'text' && c.text && c.text.trim()) {
+          const t = c.text.trim();
+          return t.length > 30 ? t.slice(0,30) + '…' : t;
+        }
+      }
+    }
+  }
+  return '未命名会话';
+}
+
+function processContent(arr) {
+  let text = '', thinking = '';
+  for (const b of arr) {
+    if (b.type === 'text' && b.text && b.text.trim()) text += (text ? '\n\n' : '') + b.text.trim();
+    if (b.type === 'thinking' && b.thinking && b.thinking.trim()) thinking += (thinking ? '\n\n' : '') + b.thinking.trim();
+  }
+  return { text, thinking };
+}
+
+function detectUserName(conversations) {
+  for (const conv of conversations) {
+    for (const m of conv.chat_messages || []) {
+      if (m.sender === 'human') {
+        for (const c of m.content || []) {
+          if (c.type === 'text' && c.text && c.text.trim()) {
+            const t = c.text.trim();
+            if (t.length <= 20 && !/^[你嗨哈早晚]/.test(t) && !/[?？]/.test(t)) {
+              return t;
+            }
+          }
+        }
+      }
+    }
+  }
+  return '';
+}
+
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ====== PARSE & RENDER ======
+
+function parseData(jsonData) {
+  const conversations = Array.isArray(jsonData) ? jsonData : [];
+  const archive = {};
+  let totalMsgs = 0;
+  let totalDays = 0;
+
+  for (const conv of conversations) {
+    if (!conv.chat_messages?.length) continue;
+    const name = getConvName(conv);
+    if (!archive[name]) archive[name] = { dates: {}, firstDate: null, lastDate: null };
+
+    for (const m of conv.chat_messages) {
+      if (!m.content?.length || !m.created_at) continue;
+      const date = extractDate(m.created_at);
+      const { text, thinking } = processContent(m.content);
+      if (!text && !thinking) continue;
+
+      if (!archive[name].dates[date]) archive[name].dates[date] = [];
+      archive[name].dates[date].push({
+        sender: m.sender,
+        time: toLocalTime(m.created_at),
+        text, thinking
+      });
+      totalMsgs++;
+
+      if (!archive[name].firstDate || date < archive[name].firstDate) archive[name].firstDate = date;
+      if (!archive[name].lastDate || date > archive[name].lastDate) archive[name].lastDate = date;
+    }
+  }
+
+  // Clean empty
+  for (const [k, v] of Object.entries(archive)) {
+    if (Object.keys(v.dates).length === 0) delete archive[k];
+    else totalDays += Object.keys(v.dates).length;
+  }
+
+  return { archive, totalMsgs, totalDays };
+}
+
+function renderCards(archive) {
+  const sorted = Object.entries(archive).sort((a, b) => {
+    return (a[1].firstDate || '').localeCompare(b[1].firstDate || '');
+  });
+
+  cardsEl.innerHTML = '';
+  for (const [name, info] of sorted) {
+    const days = Object.keys(info.dates).length;
+    const msgs = Object.values(info.dates).reduce((s, m) => s + m.length, 0);
+    const range = info.firstDate === info.lastDate
+      ? info.firstDate
+      : (info.firstDate || '') + ' ~ ' + (info.lastDate || '');
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-name">${escapeHtml(name)}</div>
+      <div class="card-meta">
+        <span>📅 ${range}</span>
+        <span>💬 ${msgs} 条</span>
+        <span>📄 ${days} 天</span>
+      </div>
+    `;
+    cardsEl.appendChild(card);
+  }
+
+  summaryEl.style.display = 'block';
+  summaryTitle.textContent = `会话预览 · ${sorted.length} 个会话`;
+  actionsEl.style.display = 'flex';
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ====== BUILD & DOWNLOAD ======
+
+async function downloadArchive(archive) {
+  const humanName = nameHuman.value.trim() || '我';
+  const aiName = nameAI.value.trim() || 'Claude';
+  const zip = new JSZip();
+
+  for (const [convName, info] of Object.entries(archive)) {
+    const folderName = convName.replace(/[<>:"/\\|?*]/g, '_');
+
+    for (const [date, msgs] of Object.entries(info.dates)) {
+      msgs.sort((a, b) => a.time.localeCompare(b.time));
+
+      let md = `# ${date} — ${convName}\n\n`;
+      for (const m of msgs) {
+        const sender = m.sender === 'human' ? humanName : aiName;
+        md += `**[${m.time}] ${sender}**\n\n`;
+        if (m.text) md += m.text + '\n\n';
+        if (m.thinking) md += '> ' + m.thinking.replace(/\n/g, '\n> ') + '\n\n';
+      }
+
+      zip.folder(folderName).file(`${date} ${folderName}.md`, md);
+    }
+  }
+
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'claude-chat-archive.zip';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast('✅ 下载完成！解压后拖进 Obsidian 就能看~');
+}
+
+// ====== FILE HANDLING ======
+
+function handleFile(file) {
+  if (!file.name.endsWith('.json')) {
+    showToast('⚠️ 请拖入 .json 文件'); return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) {
+        showToast('⚠️ JSON 格式不对，需要 conversations.json'); return;
+      }
+
+      allConversations = allConversations.concat(data);
+      const { archive, totalMsgs, totalDays } = parseData(allConversations);
+
+      // Auto-detect name from first batch
+      if (!nameHuman.value) {
+        const detected = detectUserName(data);
+        if (detected) nameHuman.value = detected;
+      }
+
+      renderCards(archive);
+      window._archive = archive; // cache for download
+
+      const convCount = Object.keys(archive).length;
+      statusEl.className = 'status ready';
+      statusEl.innerHTML = `<span class="dot"></span> 已导入 ${convCount} 个会话 · ${totalMsgs} 条消息 · ${totalDays} 个对话日`;
+
+      btnDownload.disabled = false;
+      showToast(`✨ 解析完成！${convCount} 个会话就绪`);
+    } catch (err) {
+      showToast('❌ JSON 解析失败: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+dropzone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) handleFile(fileInput.files[0]);
+});
+
+dropzone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropzone.classList.add('drag-over');
+});
+dropzone.addEventListener('dragleave', () => {
+  dropzone.classList.remove('drag-over');
+});
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+// ====== BUTTONS ======
+
+btnDownload.addEventListener('click', () => {
+  const archive = window._archive || parseData(allConversations).archive;
+  downloadArchive(archive);
+});
+
+btnAppend.addEventListener('click', () => {
+  fileInput.click();
+  showToast('📎 选择新的 JSON 追加合并~');
+});
+
+// ====== INIT ======
+btnDownload.disabled = true;
+
+})();
+</script>
+</body>
+</html>
