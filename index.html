@@ -463,13 +463,13 @@ function renderStats(archive) {
     { num: avgPerDay, label: '日均消息' },
     { num: thinkingPct + '%', label: '含思考链' },
     { num: topDay, label: '最活跃日 ' + topDayCount + '条' },
-    { num: earliest || '', label: '从' },
-    { num: latest || '', label: '到' },
+    { num: (earliest||'?') + ' → ' + (latest||'?'), label: '时间跨度' },
   ];
 
-  statsRow.innerHTML = items.map(i =>
-    `<div class="stat-card"><div class="stat-num">${i.num}</div><div class="stat-label">${i.label}</div></div>`
-  ).join('');
+  statsRow.innerHTML = items.map((i, idx) => {
+    const wide = i.label === '时间跨度' ? ' style="flex:2;min-width:160px"' : '';
+    return `<div class="stat-card"${wide}><div class="stat-num">${i.num}</div><div class="stat-label">${i.label}</div></div>`;
+  }).join('');
   statsEl.style.display = 'block';
 }
 
