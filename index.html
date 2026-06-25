@@ -8,7 +8,7 @@
 <style>
 :root {
   --bg: #fdf6f0;
-  --card: rgba(255,255,255,0.75);
+  --card: rgba(255,255,255,0.7);
   --text: #3d2e28;
   --muted: #9b8579;
   --accent: #e8815b;
@@ -16,10 +16,9 @@
   --accent3: #fce4d6;
   --border: #e8d5c8;
   --shadow: 0 2px 16px rgba(120,70,40,0.06);
-  --radius: 16px;
+  --radius: 14px;
   --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
-
 * { margin:0; padding:0; box-sizing:border-box; }
 
 body {
@@ -30,57 +29,54 @@ body {
   background-image:
     radial-gradient(ellipse at 20% 20%, #fef0e8 0%, transparent 60%),
     radial-gradient(ellipse at 80% 70%, #fce8dd 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, #fdf2ea 0%, transparent 40%);
+    radial-gradient(ellipse at 50% 0%, #fdf2ea 0%, transparent 40%);
 }
 
-/* ====== DECOR ====== */
 .decor-top {
   position: fixed; top: -80px; right: -60px; width: 280px; height: 280px;
-  border-radius: 50%; background: var(--accent3); opacity: 0.5; pointer-events: none;
-  filter: blur(40px); z-index: 0;
+  border-radius: 50%; background: var(--accent3); opacity: 0.5;
+  filter: blur(40px); pointer-events: none; z-index: 0;
 }
 .decor-bottom {
   position: fixed; bottom: -100px; left: -80px; width: 320px; height: 320px;
-  border-radius: 50%; background: #fde4d4; opacity: 0.45; pointer-events: none;
-  filter: blur(50px); z-index: 0;
+  border-radius: 50%; background: #fde4d4; opacity: 0.45;
+  filter: blur(50px); pointer-events: none; z-index: 0;
 }
 
-/* ====== LAYOUT ====== */
 .container {
-  max-width: 800px; margin: 0 auto; padding: 40px 20px 80px;
+  max-width: 760px; margin: 0 auto; padding: 44px 20px 80px;
   position: relative; z-index: 1;
 }
 
 /* ====== HEADER ====== */
 .header {
-  text-align: center; margin-bottom: 32px;
+  text-align: center; margin-bottom: 28px;
 }
 .header .icon {
-  font-size: 48px; margin-bottom: 8px;
+  font-size: 44px; margin-bottom: 6px; display: block;
   animation: float 3s ease-in-out infinite;
 }
 @keyframes float {
   0%,100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-7px); }
 }
 .header h1 {
-  font-size: 26px; font-weight: 600; color: var(--text);
+  font-size: 24px; font-weight: 650; color: var(--text);
   letter-spacing: -0.5px;
 }
 .header p {
-  color: var(--muted); font-size: 14px; margin-top: 4px;
+  color: var(--muted); font-size: 13px; margin-top: 2px;
 }
 
 /* ====== DROP ZONE ====== */
 .dropzone {
   border: 2.5px dashed var(--border);
   border-radius: var(--radius);
-  padding: 48px 24px; text-align: center;
+  padding: 44px 24px; text-align: center;
   cursor: pointer; transition: all 0.25s;
   background: var(--card); backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  margin-bottom: 24px;
-  position: relative; overflow: hidden;
+  margin-bottom: 16px;
 }
 .dropzone:hover, .dropzone.drag-over {
   border-color: var(--accent);
@@ -88,118 +84,109 @@ body {
   box-shadow: 0 0 0 4px rgba(232,129,91,0.08);
   transform: translateY(-2px);
 }
-.dropzone .dz-icon {
-  font-size: 42px; margin-bottom: 10px; display: block;
-}
-.dropzone .dz-title {
-  font-size: 16px; font-weight: 600; color: var(--text);
-}
-.dropzone .dz-sub {
-  font-size: 13px; color: var(--muted); margin-top: 4px;
-}
+.dropzone .dz-icon { font-size: 40px; margin-bottom: 8px; display: block; }
+.dropzone .dz-title { font-size: 16px; font-weight: 600; }
+.dropzone .dz-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
 .dropzone input { display: none; }
 
-/* ====== STATUS BAR ====== */
+/* ====== STATUS ====== */
 .status {
-  display: flex; align-items: center; justify-content: center;
-  gap: 10px; padding: 12px 20px; border-radius: 50px;
+  text-align: center; padding: 10px; font-size: 13px; color: var(--muted);
+  margin-bottom: 4px; transition: color 0.3s;
+}
+.status.ready { color: #6b9b6b; font-weight: 600; }
+
+/* ====== PANEL ====== */
+.panel {
   background: var(--card); backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  margin-bottom: 24px; font-size: 13px; color: var(--muted);
-  box-shadow: var(--shadow); transition: all 0.3s;
+  border-radius: var(--radius); border: 1px solid var(--border);
+  box-shadow: var(--shadow); margin-bottom: 18px; overflow: hidden;
 }
-.status.ready { color: #6b9b6b; }
-.status .dot {
-  width: 8px; height: 8px; border-radius: 50%; background: var(--border);
-  transition: background 0.3s;
+.panel-section {
+  padding: 16px 20px;
 }
-.status.ready .dot { background: #8cbf8c; }
-
-/* ====== NAME INPUTS ====== */
-.name-row {
-  display: flex; gap: 12px; margin-bottom: 24px; align-items: center;
-  flex-wrap: wrap; justify-content: center;
+.panel-section + .panel-section {
+  border-top: 1px solid var(--border);
 }
-.name-row label {
-  font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px;
+.panel-title {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px;
 }
-.name-row input {
+.panel-row {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.panel-row .label {
+  font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap;
+}
+.panel-row input {
   border: 1.5px solid var(--border); border-radius: 50px;
-  padding: 8px 14px; font-size: 14px; background: var(--card);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  color: var(--text); width: 120px; text-align: center;
+  padding: 7px 12px; font-size: 13px; background: rgba(255,255,255,0.6);
+  color: var(--text); width: 100px; text-align: center;
   transition: all 0.2s; font-family: var(--font);
 }
-.name-row input:focus {
+.panel-row input:focus {
   outline: none; border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(232,129,91,0.1);
 }
-.name-row .sep {
-  color: var(--muted); font-size: 13px;
+.panel-sep { color: var(--border); font-size: 13px; }
+
+/* stats grid */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px,1fr));
+  gap: 6px;
+}
+.stat-item { text-align: center; padding: 4px 4px 2px; }
+.stat-item .num {
+  font-size: 19px; font-weight: 700; color: var(--accent); line-height: 1.3;
+}
+.stat-item .lbl {
+  font-size: 10px; color: var(--muted); margin-top: 1px;
 }
 
-/* ====== STATS ROW ====== */
-.stats-row {
-  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;
-}
-.stat-card {
-  flex: 1; min-width: 100px;
-  background: var(--card); backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: var(--radius); padding: 14px 16px;
-  text-align: center; box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-}
-.stat-card .stat-num {
-  font-size: 22px; font-weight: 700; color: var(--accent);
-  line-height: 1.2;
-}
-.stat-card .stat-label {
-  font-size: 11px; color: var(--muted); margin-top: 2px;
-}
-
-/* ====== CARDS GRID ====== */
-.section-title {
-  font-size: 14px; font-weight: 600; color: var(--muted);
-  margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+/* ====== CARDS ====== */
+.section-header {
+  font-size: 12px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; margin-top: 20px;
 }
 .cards {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
-  gap: 12px; margin-bottom: 24px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(210px,1fr));
+  gap: 10px; margin-bottom: 18px;
 }
 .card {
   background: var(--card); backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-radius: var(--radius); padding: 16px 18px;
+  border-radius: var(--radius); padding: 14px 16px;
   box-shadow: var(--shadow); border: 1px solid var(--border);
-  transition: all 0.25s; cursor: default;
+  transition: all 0.2s;
 }
 .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 24px rgba(120,70,40,0.1);
   border-color: var(--accent2);
 }
-.card .card-name {
-  font-size: 15px; font-weight: 600; color: var(--text);
+.card-name {
+  font-size: 14px; font-weight: 600; color: var(--text);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   margin-bottom: 6px;
 }
-.card .card-meta {
-  font-size: 12px; color: var(--muted); line-height: 1.6;
+.card-meta {
+  font-size: 11px; color: var(--muted); line-height: 1.6;
 }
-.card .card-meta span {
+.card-meta span {
   display: inline-block; background: var(--accent3);
   padding: 2px 8px; border-radius: 50px; margin-right: 4px; margin-top: 2px;
-  font-size: 11px;
+  font-size: 10px;
 }
 
 /* ====== ACTIONS ====== */
 .actions {
   display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  margin-top: 6px;
 }
 .btn {
-  padding: 12px 28px; border-radius: 50px; font-size: 14px; font-weight: 600;
-  border: none; cursor: pointer; transition: all 0.25s;
+  padding: 12px 26px; border-radius: 50px; font-size: 14px; font-weight: 600;
+  border: none; cursor: pointer; transition: all 0.2s;
   font-family: var(--font); letter-spacing: -0.3px;
 }
 .btn-primary {
@@ -213,20 +200,11 @@ body {
 .btn-primary:disabled {
   background: #d4b8aa; box-shadow: none; cursor: not-allowed; transform: none;
 }
-.btn-secondary {
-  background: transparent; border: 1.5px solid var(--border);
-  color: var(--text);
-}
-.btn-secondary:hover {
-  border-color: var(--accent); color: var(--accent);
-}
-.btn-append {
+.btn-ghost {
   background: transparent; border: 1.5px dashed var(--border);
   color: var(--muted); font-size: 13px;
 }
-.btn-append:hover {
-  border-color: var(--accent2); color: var(--accent);
-}
+.btn-ghost:hover { border-color: var(--accent2); color: var(--accent); }
 
 /* ====== TOAST ====== */
 .toast {
@@ -240,15 +218,10 @@ body {
 
 /* ====== RESPONSIVE ====== */
 @media (max-width: 500px) {
-  .header h1 { font-size: 22px; }
+  .header h1 { font-size: 20px; }
   .dropzone { padding: 32px 16px; }
   .cards { grid-template-columns: 1fr; }
-  .name-row { flex-direction: column; }
-}
-
-/* ====== EMPTY STATE ====== */
-.empty-hint {
-  text-align: center; padding: 24px; color: var(--muted); font-size: 14px;
+  .stats-grid { grid-template-columns: repeat(3,1fr); }
 }
 </style>
 </head>
@@ -258,42 +231,60 @@ body {
 <div class="decor-bottom"></div>
 
 <div class="container">
+
+  <!-- HEADER -->
   <div class="header">
     <span class="icon">📦</span>
     <h1>Claude Chat Archive</h1>
-    <p>拖入 conversations.json，一键变成可读的日记存档</p>
+    <p>拖入 conversations.json · 一键变成可读的日记存档</p>
   </div>
 
+  <!-- DROP ZONE -->
   <div class="dropzone" id="dropzone">
     <span class="dz-icon">📂</span>
     <div class="dz-title">拖入 conversations.json</div>
-    <div class="dz-sub">或点击这里选择文件 · 数据留在本地，不上传服务器</div>
+    <div class="dz-sub">或点击这里选择文件 · 数据留在本地，不上传</div>
     <input type="file" id="fileInput" accept=".json">
   </div>
 
-  <div class="status" id="status">
-    <span class="dot"></span> 等待导入...
+  <!-- STATUS -->
+  <div class="status" id="status">等待导入…</div>
+
+  <!-- PANEL: 设置 + 统计 -->
+  <div class="panel" id="panel" style="display:none;">
+
+    <!-- 名字设置 -->
+    <div class="panel-section">
+      <div class="panel-title">名字设置</div>
+      <div class="panel-row">
+        <span class="label">🙋</span>
+        <input type="text" id="nameHuman" placeholder="自动检测">
+        <span class="panel-sep">·</span>
+        <span class="label">🤖</span>
+        <input type="text" id="nameAI" placeholder="Claude" value="Claude">
+      </div>
+    </div>
+
+    <!-- 统计 -->
+    <div class="panel-section" id="statsSection" style="display:none;">
+      <div class="panel-title">统计</div>
+      <div class="stats-grid" id="statsGrid"></div>
+    </div>
+
   </div>
 
-  <div class="name-row">
-    <label>🙋 <input type="text" id="nameHuman" placeholder="自动检测" value=""></label>
-    <span class="sep">·</span>
-    <label>🤖 <input type="text" id="nameAI" placeholder="Claude" value="Claude"></label>
-  </div>
-
-  <div id="stats" style="display:none;">
-    <div class="section-title">📊 统计</div>
-    <div class="stats-row" id="statsRow"></div>
-  </div>
-  <div id="summary" style="display:none;">
-    <div class="section-title" id="summaryTitle">会话预览</div>
+  <!-- CARDS -->
+  <div id="cardsArea" style="display:none;">
+    <div class="section-header" id="cardsTitle">会话预览</div>
     <div class="cards" id="cards"></div>
   </div>
 
+  <!-- ACTIONS -->
   <div class="actions" id="actions" style="display:none;">
-    <button class="btn btn-secondary btn-append" id="btnAppend">📎 追加新的 JSON</button>
+    <button class="btn btn-ghost" id="btnAppend">📎 追加新的 JSON</button>
     <button class="btn btn-primary" id="btnDownload">⬇ 下载 Markdown 存档</button>
   </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -301,22 +292,24 @@ body {
 <script>
 (function() {
 
-const dropzone = document.getElementById('dropzone');
-const fileInput = document.getElementById('fileInput');
-const statusEl = document.getElementById('status');
-const cardsEl = document.getElementById('cards');
-const summaryEl = document.getElementById('summary');
-const summaryTitle = document.getElementById('summaryTitle');
-const statsEl = document.getElementById('stats');
-const statsRow = document.getElementById('statsRow');
-const actionsEl = document.getElementById('actions');
-const btnDownload = document.getElementById('btnDownload');
-const btnAppend = document.getElementById('btnAppend');
-const nameHuman = document.getElementById('nameHuman');
-const nameAI = document.getElementById('nameAI');
-const toast = document.getElementById('toast');
+const $ = id => document.getElementById(id);
+const dropzone = $('dropzone');
+const fileInput = $('fileInput');
+const statusEl = $('status');
+const panel = $('panel');
+const statsSection = $('statsSection');
+const statsGrid = $('statsGrid');
+const cardsArea = $('cardsArea');
+const cardsEl = $('cards');
+const cardsTitle = $('cardsTitle');
+const actionsEl = $('actions');
+const btnDownload = $('btnDownload');
+const btnAppend = $('btnAppend');
+const nameHuman = $('nameHuman');
+const nameAI = $('nameAI');
+const toast = $('toast');
 
-let allConversations = []; // merged data
+let allConversations = [];
 
 // ====== HELPERS ======
 
@@ -361,9 +354,7 @@ function detectUserName(conversations) {
         for (const c of m.content || []) {
           if (c.type === 'text' && c.text && c.text.trim()) {
             const t = c.text.trim();
-            if (t.length <= 20 && !/^[你嗨哈早晚]/.test(t) && !/[?？]/.test(t)) {
-              return t;
-            }
+            if (t.length <= 20 && !/^[你嗨哈早晚]/.test(t) && !/[?？]/.test(t)) return t;
           }
         }
       }
@@ -379,13 +370,18 @@ function showToast(msg) {
   toast._t = setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-// ====== PARSE & RENDER ======
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ====== PARSE ======
 
 function parseData(jsonData) {
   const conversations = Array.isArray(jsonData) ? jsonData : [];
   const archive = {};
-  let totalMsgs = 0;
-  let totalDays = 0;
+  let totalMsgs = 0, totalDays = 0;
 
   for (const conv of conversations) {
     if (!conv.chat_messages?.length) continue;
@@ -400,18 +396,11 @@ function parseData(jsonData) {
 
       if (!archive[name].dates[date]) archive[name].dates[date] = [];
       archive[name].dates[date].push({
-        sender: m.sender,
-        time: toLocalTime(m.created_at),
-        text, thinking
+        sender: m.sender, time: toLocalTime(m.created_at), text, thinking
       });
       totalMsgs++;
 
-      // stats
-      if (!archive[name]._humanMsgs) archive[name]._humanMsgs = 0;
-      if (!archive[name]._aiMsgs) archive[name]._aiMsgs = 0;
       if (!archive[name]._thinkingMsgs) archive[name]._thinkingMsgs = 0;
-      if (m.sender === 'human') archive[name]._humanMsgs++;
-      else archive[name]._aiMsgs++;
       if (thinking) archive[name]._thinkingMsgs++;
 
       if (!archive[name].firstDate || date < archive[name].firstDate) archive[name].firstDate = date;
@@ -419,7 +408,6 @@ function parseData(jsonData) {
     }
   }
 
-  // Clean empty
   for (const [k, v] of Object.entries(archive)) {
     if (Object.keys(v.dates).length === 0) delete archive[k];
     else totalDays += Object.keys(v.dates).length;
@@ -428,15 +416,13 @@ function parseData(jsonData) {
   return { archive, totalMsgs, totalDays };
 }
 
+// ====== RENDER ======
+
 function renderStats(archive) {
-  let totalMsgs = 0, totalDays = 0, totalHuman = 0, totalAI = 0, totalThinking = 0;
-  let earliest = null, latest = null;
-  const dayCount = {}; // date -> msg count
-  const convNames = Object.keys(archive);
+  let totalMsgs = 0, totalDays = 0, totalThinking = 0, earliest = null, latest = null;
+  const dayCount = {};
 
   for (const [, info] of Object.entries(archive)) {
-    totalHuman += (info._humanMsgs || 0);
-    totalAI += (info._aiMsgs || 0);
     totalThinking += (info._thinkingMsgs || 0);
     for (const [date, msgs] of Object.entries(info.dates)) {
       totalMsgs += msgs.length;
@@ -447,7 +433,6 @@ function renderStats(archive) {
     }
   }
 
-  // Most active day
   let topDay = '', topDayCount = 0;
   for (const [d, c] of Object.entries(dayCount)) {
     if (c > topDayCount) { topDayCount = c; topDay = d; }
@@ -457,20 +442,19 @@ function renderStats(archive) {
   const avgPerDay = totalDays > 0 ? Math.round(totalMsgs / totalDays) : 0;
 
   const items = [
-    { num: convNames.length, label: '会话窗口' },
-    { num: totalMsgs.toLocaleString(), label: '消息总数' },
-    { num: totalDays, label: '对话天数' },
-    { num: avgPerDay, label: '日均消息' },
-    { num: thinkingPct + '%', label: '含思考链' },
-    { num: topDay, label: '最活跃日 ' + topDayCount + '条' },
-    { num: earliest || '', label: '从' },
-    { num: latest || '', label: '到' },
+    { num: Object.keys(archive).length,   label: '会话窗口' },
+    { num: totalMsgs.toLocaleString(),    label: '消息总数' },
+    { num: totalDays,                     label: '对话天数' },
+    { num: avgPerDay,                     label: '日均消息' },
+    { num: thinkingPct + '%',             label: '含思考链' },
+    { num: topDay,                        label: '最活跃日' },
+    { num: (earliest||'') + ' → ' + (latest||''), label: '时间跨度' },
   ];
 
-  statsRow.innerHTML = items.map(i =>
-    `<div class="stat-card"><div class="stat-num">${i.num}</div><div class="stat-label">${i.label}</div></div>`
+  statsGrid.innerHTML = items.map(i =>
+    `<div class="stat-item"><div class="num">${i.num}</div><div class="lbl">${i.label}</div></div>`
   ).join('');
-  statsEl.style.display = 'block';
+  statsSection.style.display = 'block';
 }
 
 function renderCards(archive) {
@@ -483,32 +467,22 @@ function renderCards(archive) {
     const days = Object.keys(info.dates).length;
     const msgs = Object.values(info.dates).reduce((s, m) => s + m.length, 0);
     const range = info.firstDate === info.lastDate
-      ? info.firstDate
-      : (info.firstDate || '') + ' ~ ' + (info.lastDate || '');
+      ? info.firstDate : (info.firstDate||'') + ' ~ ' + (info.lastDate||'');
 
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
       <div class="card-name">${escapeHtml(name)}</div>
       <div class="card-meta">
-        <span>📅 ${range}</span>
-        <span>💬 ${msgs} 条</span>
-        <span>📄 ${days} 天</span>
-      </div>
-    `;
+        <span>📅 ${range}</span><span>💬 ${msgs} 条</span><span>📄 ${days} 天</span>
+      </div>`;
     cardsEl.appendChild(card);
   }
 
   renderStats(archive);
-  summaryEl.style.display = 'block';
-  summaryTitle.textContent = `会话预览 · ${sorted.length} 个会话`;
+  cardsArea.style.display = 'block';
+  cardsTitle.textContent = `会话预览 · ${sorted.length} 个会话`;
   actionsEl.style.display = 'flex';
-}
-
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
 }
 
 // ====== BUILD & DOWNLOAD ======
@@ -520,18 +494,14 @@ async function downloadArchive(archive) {
 
   for (const [convName, info] of Object.entries(archive)) {
     const folderName = convName.replace(/[<>:"/\\|?*]/g, '_');
-
     for (const [date, msgs] of Object.entries(info.dates)) {
       msgs.sort((a, b) => a.time.localeCompare(b.time));
-
       let md = `# ${date} — ${convName}\n\n`;
       for (const m of msgs) {
-        const sender = m.sender === 'human' ? humanName : aiName;
-        md += `**[${m.time}] ${sender}**\n\n`;
+        md += `**[${m.time}] ${m.sender === 'human' ? humanName : aiName}**\n\n`;
         if (m.text) md += m.text + '\n\n';
         if (m.thinking) md += '> ' + m.thinking.replace(/\n/g, '\n> ') + '\n\n';
       }
-
       zip.folder(folderName).file(`${date} ${folderName}.md`, md);
     }
   }
@@ -539,49 +509,41 @@ async function downloadArchive(archive) {
   const blob = await zip.generateAsync({ type: 'blob' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'claude-chat-archive.zip';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  a.href = url; a.download = 'claude-chat-archive.zip';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
-
   showToast('✅ 下载完成！解压后拖进 Obsidian 就能看~');
 }
 
 // ====== FILE HANDLING ======
 
 function handleFile(file) {
-  if (!file.name.endsWith('.json')) {
-    showToast('⚠️ 请拖入 .json 文件'); return;
-  }
+  if (!file.name.endsWith('.json')) { showToast('⚠️ 请拖入 .json 文件'); return; }
 
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
       const data = JSON.parse(e.target.result);
-      if (!Array.isArray(data)) {
-        showToast('⚠️ JSON 格式不对，需要 conversations.json'); return;
-      }
+      if (!Array.isArray(data)) { showToast('⚠️ 格式不对，需要 conversations.json'); return; }
 
       allConversations = allConversations.concat(data);
       const { archive, totalMsgs, totalDays } = parseData(allConversations);
 
-      // Auto-detect name from first batch
       if (!nameHuman.value) {
         const detected = detectUserName(data);
         if (detected) nameHuman.value = detected;
       }
 
+      panel.style.display = 'block';
       renderCards(archive);
-      window._archive = archive; // cache for download
+      window._archive = archive;
 
       const convCount = Object.keys(archive).length;
       statusEl.className = 'status ready';
-      statusEl.innerHTML = `<span class="dot"></span> 已导入 ${convCount} 个会话 · ${totalMsgs} 条消息 · ${totalDays} 个对话日`;
+      statusEl.textContent = `✨ 已导入 ${convCount} 个会话 · ${totalMsgs} 条消息 · ${totalDays} 个对话日`;
 
       btnDownload.disabled = false;
-      showToast(`✨ 解析完成！${convCount} 个会话就绪`);
+      showToast(`解析完成！${convCount} 个会话就绪`);
     } catch (err) {
       showToast('❌ JSON 解析失败: ' + err.message);
     }
@@ -590,37 +552,20 @@ function handleFile(file) {
 }
 
 dropzone.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', () => {
-  if (fileInput.files[0]) handleFile(fileInput.files[0]);
-});
-
-dropzone.addEventListener('dragover', e => {
-  e.preventDefault();
-  dropzone.classList.add('drag-over');
-});
-dropzone.addEventListener('dragleave', () => {
-  dropzone.classList.remove('drag-over');
-});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
 dropzone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropzone.classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (file) handleFile(file);
+  e.preventDefault(); dropzone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
 });
-
-// ====== BUTTONS ======
 
 btnDownload.addEventListener('click', () => {
   const archive = window._archive || parseData(allConversations).archive;
   downloadArchive(archive);
 });
+btnAppend.addEventListener('click', () => { fileInput.click(); showToast('📎 选择新的 JSON 追加合并~'); });
 
-btnAppend.addEventListener('click', () => {
-  fileInput.click();
-  showToast('📎 选择新的 JSON 追加合并~');
-});
-
-// ====== INIT ======
 btnDownload.disabled = true;
 
 })();
