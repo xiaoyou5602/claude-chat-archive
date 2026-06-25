@@ -138,6 +138,26 @@ body {
   color: var(--muted); font-size: 13px;
 }
 
+/* ====== STATS ROW ====== */
+.stats-row {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;
+}
+.stat-card {
+  flex: 1; min-width: 100px;
+  background: var(--card); backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius); padding: 14px 16px;
+  text-align: center; box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+.stat-card .stat-num {
+  font-size: 22px; font-weight: 700; color: var(--accent);
+  line-height: 1.2;
+}
+.stat-card .stat-label {
+  font-size: 11px; color: var(--muted); margin-top: 2px;
+}
+
 /* ====== CARDS GRID ====== */
 .section-title {
   font-size: 14px; font-weight: 600; color: var(--muted);
@@ -261,6 +281,10 @@ body {
     <label>🤖 <input type="text" id="nameAI" placeholder="Claude" value="Claude"></label>
   </div>
 
+  <div id="stats" style="display:none;">
+    <div class="section-title">📊 统计</div>
+    <div class="stats-row" id="statsRow"></div>
+  </div>
   <div id="summary" style="display:none;">
     <div class="section-title" id="summaryTitle">会话预览</div>
     <div class="cards" id="cards"></div>
@@ -283,6 +307,8 @@ const statusEl = document.getElementById('status');
 const cardsEl = document.getElementById('cards');
 const summaryEl = document.getElementById('summary');
 const summaryTitle = document.getElementById('summaryTitle');
+const statsEl = document.getElementById('stats');
+const statsRow = document.getElementById('statsRow');
 const actionsEl = document.getElementById('actions');
 const btnDownload = document.getElementById('btnDownload');
 const btnAppend = document.getElementById('btnAppend');
@@ -380,6 +406,14 @@ function parseData(jsonData) {
       });
       totalMsgs++;
 
+      // stats
+      if (!archive[name]._humanMsgs) archive[name]._humanMsgs = 0;
+      if (!archive[name]._aiMsgs) archive[name]._aiMsgs = 0;
+      if (!archive[name]._thinkingMsgs) archive[name]._thinkingMsgs = 0;
+      if (m.sender === 'human') archive[name]._humanMsgs++;
+      else archive[name]._aiMsgs++;
+      if (thinking) archive[name]._thinkingMsgs++;
+
       if (!archive[name].firstDate || date < archive[name].firstDate) archive[name].firstDate = date;
       if (!archive[name].lastDate || date > archive[name].lastDate) archive[name].lastDate = date;
     }
@@ -392,6 +426,53 @@ function parseData(jsonData) {
   }
 
   return { archive, totalMsgs, totalDays };
+}
+
+function renderStats(archive) {
+  let totalMsgs = 0, totalDays = 0, totalHuman = 0, totalAI = 0, totalThinking = 0;
+  let earliest = null, latest = null;
+  const dayCount = {}; // date -> msg count
+  const convNames = Object.keys(archive);
+
+  for (const [, info] of Object.entries(archive)) {
+    totalHuman += (info._humanMsgs || 0);
+    totalAI += (info._aiMsgs || 0);
+    totalThinking += (info._thinkingMsgs || 0);
+    for (const [date, msgs] of Object.entries(info.dates)) {
+      totalMsgs += msgs.length;
+      totalDays++;
+      dayCount[date] = (dayCount[date] || 0) + msgs.length;
+      if (!earliest || date < earliest) earliest = date;
+      if (!latest || date > latest) latest = date;
+    }
+  }
+
+  // Most active day
+  let topDay = '', topDayCount = 0;
+  for (const [d, c] of Object.entries(dayCount)) {
+    if (c > topDayCount) { topDayCount = c; topDay = d; }
+  }
+
+  const thinkingPct = totalMsgs > 0 ? Math.round(totalThinking / totalMsgs * 100) : 0;
+  const avgPerDay = totalDays > 0 ? Math.round(totalMsgs / totalDays) : 0;
+
+  const items = [
+    { num: convNames.length, label: '会话窗口' },
+    { num: totalMsgs.toLocaleString(), label: '消息总数' },
+    { num: totalDays, label: '对话天数' },
+    { num: avgPerDay, label: '日均消息' },
+    { num: thinkingPct + '%', label: '含思考链' },
+    { num: totalHuman.toLocaleString(), label: '我发的' },
+    { num: totalAI.toLocaleString(), label: 'Claude 发的' },
+    { num: topDay, label: '最活跃日 ' + topDayCount + '条' },
+    { num: earliest || '', label: '从' },
+    { num: latest || '', label: '到' },
+  ];
+
+  statsRow.innerHTML = items.map(i =>
+    `<div class="stat-card"><div class="stat-num">${i.num}</div><div class="stat-label">${i.label}</div></div>`
+  ).join('');
+  statsEl.style.display = 'block';
 }
 
 function renderCards(archive) {
@@ -420,6 +501,7 @@ function renderCards(archive) {
     cardsEl.appendChild(card);
   }
 
+  renderStats(archive);
   summaryEl.style.display = 'block';
   summaryTitle.textContent = `会话预览 · ${sorted.length} 个会话`;
   actionsEl.style.display = 'flex';
