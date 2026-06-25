@@ -360,23 +360,6 @@ function processContent(arr) {
   return { text, thinking };
 }
 
-function detectUserName(conversations) {
-  const skip = [/^[你嗨哈早晚]/, /[?？]/, /^连接/, /^打开/, /^帮/, /^请/, /^怎么/, /^如何/, /^http/, /\.json/, /^customize/i, /^搭/];
-  for (const conv of conversations) {
-    for (const m of conv.chat_messages || []) {
-      if (m.sender === 'human') {
-        for (const c of m.content || []) {
-          if (c.type === 'text' && c.text && c.text.trim()) {
-            const t = c.text.trim();
-            if (t.length <= 20 && !skip.some(p => p.test(t))) return t;
-          }
-        }
-      }
-    }
-  }
-  return '';
-}
-
 function showToast(msg) {
   toast.textContent = msg;
   toast.classList.add('show');
@@ -523,7 +506,7 @@ function escapeHtml(str) {
 // ====== BUILD & DOWNLOAD ======
 
 async function downloadArchive(archive) {
-  const humanName = nameHuman.value.trim() || '我';
+  const humanName = nameHuman.value.trim() || 'user';
   const aiName = nameAI.value.trim() || 'Claude';
   const zip = new JSZip();
 
@@ -575,12 +558,6 @@ function handleFile(file) {
 
       allConversations = allConversations.concat(data);
       const { archive, totalMsgs, totalDays } = parseData(allConversations);
-
-      // Auto-detect name from first batch
-      if (!nameHuman.value) {
-        const detected = detectUserName(data);
-        if (detected) nameHuman.value = detected;
-      }
 
       renderCards(archive);
       window._archive = archive; // cache for download
