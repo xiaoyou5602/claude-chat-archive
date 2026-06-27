@@ -103,6 +103,36 @@ A: 目前是全部导出。如果想筛选，可以先在 Claude 里给目标会
 **Q: 会覆盖我已有的文件吗？**
 A: 默认全量重建。用 `--append` 模式则只追加新会话，不碰已有的。
 
+## 项目文件
+
+```
+claude-chat-archive/
+├── index.html                 ← 网页版（推荐给不想装 Node.js 的朋友）
+│    拖入 JSON → 预览 → 一键下载 MD 存档
+│    数据全程留在浏览器，不上传服务器
+│
+├── claude-chat-archive.js     ← 命令行版（适合开发者 / 批量处理）
+│    node claude-chat-archive.js ./conversations.json
+│    支持 --out / --tz / --senders / --append
+│
+├── README.md                  ← 你正在看的文档
+│
+├── package.json               ← npm 包配置
+│    记录了项目名、版本、作者、MIT 许可
+│    以后可以发布到 npm：npm install -g claude-chat-archive
+│
+└── .gitignore                 ← Git 忽略规则
+    排除 node_modules、临时输出等
+```
+
+**怎么选？**
+
+| 你是… | 用这个 |
+|--------|--------|
+| 就想看看聊天记录长啥样 | 🌐 网页版：打开链接，拖入 JSON |
+| 想本地跑、批量处理 | 💻 命令行版：`node claude-chat-archive.js` |
+| 想自己改着玩 | 📥 下载整个仓库，改 `index.html` 或 `.js` |
+
 ## 许可
 
 MIT — 随便用，随便改，随便分享。
