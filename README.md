@@ -1,8 +1,8 @@
 # Claude Chat Archive
 
-把 Claude 导出的 `conversations.json` 转成人类可读的 Markdown 存档。
+把 Claude 导出的 `conversations.json` 一键转成人类可读的 Markdown 存档。
 
-> Claude 的数据导出功能会生成一个 `conversations.json`，包含所有会话窗口的完整聊天记录。但它是个巨大的单行 JSON——人没法直接看。这个脚本把它变成按**会话 + 日期**分组的 Markdown 文件，保留**时间戳**和**思考链（thinking）**，两个聊天对象一目了然。
+> Claude 的数据导出功能会生成一个 `conversations.json`，包含所有会话窗口的完整聊天记录。但它是个巨大的单行 JSON——人没法直接看。这个脚本把它变成按**会话 + 日期**分组的 Markdown 文件，可选**时间戳**和**思考链（thinking）**
 
 ## 效果预览
 
